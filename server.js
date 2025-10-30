@@ -19,10 +19,11 @@ const connecteDb = require("./db")
 connecteDb()
 
 // for frontend access (CORS)
-const cors = require("cors")
-// app.use(cors())
-app.use(cors({ origin: "https://booklt-r8geoheji-sunnyss-projects.vercel.app", methods: ["GET", "POST", "PUT", "DELETE"] }));
-
+const cors = require('cors');
+app.use(cors({
+  origin: 'https://booklt-r8geoheji-sunnyss-projects.vercel.app',  // Vercel frontend ka URL
+  methods: ['GET', 'POST'],
+}));
 
 // router setup
 const apiRoutes = require("./routes/index")
