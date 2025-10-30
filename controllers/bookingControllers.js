@@ -1,89 +1,141 @@
-const Booking = require('../models/Booking');
-const Slot = require('../models/Slot');
+const Booking = require("../models/Booking");
+const Slot = require("../models/Slot");
 
-
+// ✅ Validate Promo Code
 const validatePromoCode = async (req, res) => {
   const { code, currentPrice } = req.body;
+  console.log("🟡 Promo Validation Request:", req.body);
 
   const validCodes = {
-    SAVE10: { type: 'PERCENT', value: 0.10 }, 
-    FLAT100: { type: 'FLAT', value: 100 },  
-    BOOKLT20: { type: 'PERCENT', value: 0.20 }, 
+    SAVE10: { type: "PERCENT", value: 0.1 },
+    FLAT100: { type: "FLAT", value: 100 },
+    BOOKLT20: { type: "PERCENT", value: 0.2 },
+    MYBOOK200: { type: "FLAT", value: 200 },
   };
 
-  const promo = validCodes[code.toUpperCase()];
+  const promo = validCodes[code?.toUpperCase()];
 
   if (promo) {
     let discount = 0;
-    if (promo.type === 'PERCENT') {
+
+    if (promo.type === "PERCENT") {
       discount = currentPrice * promo.value;
-    } else if (promo.type === 'FLAT') {
+    } else if (promo.type === "FLAT") {
       discount = promo.value;
     }
-    
-    const newPrice = Math.max(0, currentPrice - discount); 
-    
-    res.json({ valid: true, discount, finalPrice: newPrice, message: `Promo code ${code.toUpperCase()} applied successfully!` });
+
+    const newPrice = Math.max(0, currentPrice - discount);
+
+    console.log("✅ Promo Applied:", {
+      code,
+      type: promo.type,
+      discount,
+      finalPrice: newPrice,
+    });
+
+    return res.json({
+      valid: true,
+      discount,
+      finalPrice: newPrice,
+      message: `Promo code ${code.toUpperCase()} applied successfully!`,
+    });
   } else {
-    res.status(400).json({ valid: false, message: 'Invalid promo code or code has expired.' }); 
+    console.log("❌ Invalid Promo Code:", code);
+    return res.status(400).json({
+      valid: false,
+      message: "❌ Invalid promo code or code has expired.",
+    });
   }
 };
 
-
+// ✅ Create Booking
 const createBooking = async (req, res) => {
-  const { slotId, userName, userEmail, numTickets, promoCode, finalPrice } = req.body;
+  console.log("🟡 Booking Request Body:", req.body);
 
-  if (!slotId || !userName || !userEmail || !numTickets || numTickets < 1 || !finalPrice) {
-    return res.status(400).json({ message: 'Missing required booking details or number of tickets is invalid.' });
+  const {
+    experienceId,
+    slot,
+    user,
+    totalPrice,
+    promoCode,
+    numTickets = 1,
+  } = req.body;
+
+  // 🧠 Default username if missing or empty
+  const userName =
+    user?.name && user.name.trim() !== "" ? user.name.trim() : "user1";
+
+  // ✅ Ensure user object exists
+  if (!user) {
+    console.log("❌ Missing user object in request body");
+    return res.status(400).json({ message: "❌ Missing user details." });
+  }
+
+  // ✅ Validate required booking data
+  if (!slot || !experienceId || !totalPrice || !user.email) {
+    console.log("❌ Invalid booking data:", req.body);
+    return res.status(400).json({ message: "❌ Missing required booking details." });
   }
 
   try {
-    const slot = await Slot.findById(slotId);
-
-    if (!slot) {
-      return res.status(404).json({ message: 'Selected slot not found.' });
-    }
-    
-    if (slot.date < new Date(new Date().setHours(0, 0, 0, 0))) {
-        return res.status(400).json({ message: 'This slot is in the past and cannot be booked.' });
+    const slotData = await Slot.findById(slot);
+    if (!slotData) {
+      console.log("❌ Slot not found:", slot);
+      return res.status(404).json({ message: "❌ Slot not found." });
     }
 
-    if (slot.bookedSeats + numTickets > slot.totalSeats) {
-      return res.status(400).json({ message: 'Not enough seats available for this slot. Please try a different time.' });
+    // ✅ Prevent booking past dates
+    if (slotData.date < new Date(new Date().setHours(0, 0, 0, 0))) {
+      console.log("❌ Slot is in the past:", slotData.date);
+      return res.status(400).json({ message: "❌ Cannot book past dates." });
     }
-    
 
+    // ✅ Check available seats
+    if (slotData.bookedSeats + numTickets > slotData.totalSeats) {
+      console.log("❌ Not enough seats available.");
+      return res.status(400).json({ message: "❌ Not enough seats available." });
+    }
+
+    // ✅ Update booked seats
     const updatedSlot = await Slot.findByIdAndUpdate(
-        slotId, 
-        { $inc: { bookedSeats: numTickets } }, 
-        { new: true } 
+      slot,
+      { $inc: { bookedSeats: numTickets } },
+      { new: true }
     );
 
-
     if (updatedSlot.bookedSeats === updatedSlot.totalSeats) {
-        await Slot.updateOne({ _id: slotId }, { $set: { status: 'Sold Out' } });
+      await Slot.updateOne({ _id: slot }, { $set: { status: "Sold Out" } });
     }
 
+    // ✅ Save booking
     const newBooking = new Booking({
-      experience: slot.experience,
-      slot: slotId,
+      experience: experienceId,
+      slot,
       userName,
-      userEmail,
+      userEmail: user.email,
+      userPhone: user.phone || "",
       numTickets,
       promoCodeUsed: promoCode || null,
-      finalPrice, 
+      finalPrice: totalPrice,
     });
 
     const savedBooking = await newBooking.save();
+    console.log("✅ Booking Saved:", savedBooking._id);
 
-    res.status(201).json({
-        message: 'Booking successful! Confirmation email sent.',
-        bookingId: savedBooking._id,
-        confirmationNumber: savedBooking._id.toString().slice(-6).toUpperCase() 
+    return res.status(201).json({
+      success: true,
+      message: "✅ Booking successful!",
+      bookingId: savedBooking._id,
+      confirmationNumber: savedBooking._id.toString().slice(-6).toUpperCase(),
+      userName,
     });
   } catch (error) {
-    console.error('Booking creation error:', error);
-    res.status(500).json({ message: 'Booking failed due to a server error. Please try again.' });
+    console.error("🔥 Booking Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "❌ Booking failed due to server error.",
+      error: error.message,
+    });
   }
 };
 
