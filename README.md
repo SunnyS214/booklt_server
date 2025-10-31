@@ -47,8 +47,12 @@ cd booklt_server
 
 
 🔗 API Routes
-Method	  Endpoint	          Description
-GET    	  /api/experiences	 Fetch all experiences
-POST 	        /api/bookings	  Create a new booking
-GET      	/api/bookings/:id	 Get booking details
+
+
+GET : /api/experiences =>	 Fetch all experiences
+
+POST 	 :       /api/bookings	=>  Create a new booking
+
+GET     : 	/api/bookings/:id	=> Get booking details
+
 
