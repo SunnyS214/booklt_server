@@ -56,3 +56,23 @@ POST 	 :       /api/bookings	=>  Create a new booking
 GET     : 	/api/bookings/:id	=> Get booking details
 
 
+
+🌐 Frontend Connection
+
+Frontend Repo:
+🔗 [BookLT FrontendRepo:](https://github.com/SunnyS214/booklt-frontend)
+
+Allowed Origins (CORS):
+
+https://booklt-smoky.vercel.app
+https://booklt-r8geoheji-sunnyss-projects.vercel.app
+http://localhost:5173
+
+👨‍💻 Developer
+
+Sunny Sonawane
+📧 sonawanesunny69@gmail.com
+
+🌍 Pune, India
+💼 MERN Stack Developer | Passionate about scalable full-stack solutions
+
