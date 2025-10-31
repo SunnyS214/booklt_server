@@ -32,18 +32,25 @@ booklt_server/
 
 ├── 
 routes/ # All API route files
+
 │ └── 
 index.js
+
 │
 ├── 
 models/ # Mongoose schemas
+
 │
 ├── 
 db.js # MongoDB connection
+
 ├──
 server.js # Main entry file
+
 └──
 .env # Environment variables
+
+
 
 ## ⚙️ Setup Instructions
 
@@ -84,6 +91,7 @@ Sunny Sonawane
 
 🌍 Pune, India
 💼 MERN Stack Developer | Passionate about scalable full-stack solutions
+
 
 
 
