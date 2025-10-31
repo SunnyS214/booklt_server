@@ -29,14 +29,21 @@ It provides REST APIs for managing experiences and user bookings, with proper CO
 ## 🗂️ Project Structure
 booklt_server/
 │
-├── routes/ # All API route files
-│ └── index.js
+
+├── 
+routes/ # All API route files
+│ └── 
+index.js
 │
-├── models/ # Mongoose schemas
+├── 
+models/ # Mongoose schemas
 │
-├── db.js # MongoDB connection
-├── server.js # Main entry file
-└── .env # Environment variables
+├── 
+db.js # MongoDB connection
+├──
+server.js # Main entry file
+└──
+.env # Environment variables
 
 ## ⚙️ Setup Instructions
 
@@ -77,5 +84,6 @@ Sunny Sonawane
 
 🌍 Pune, India
 💼 MERN Stack Developer | Passionate about scalable full-stack solutions
+
 
 
