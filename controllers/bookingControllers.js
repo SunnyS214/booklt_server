@@ -1,10 +1,9 @@
 const Booking = require("../models/Booking");
 const Slot = require("../models/Slot");
 
-// ✅ Validate Promo Code
 const validatePromoCode = async (req, res) => {
   const { code, currentPrice } = req.body;
-  console.log("🟡 Promo Validation Request:", req.body);
+  console.log("Promo Validation Request:", req.body);
 
   const validCodes = {
     SAVE10: { type: "PERCENT", value: 0.1 },
@@ -26,7 +25,7 @@ const validatePromoCode = async (req, res) => {
 
     const newPrice = Math.max(0, currentPrice - discount);
 
-    console.log("✅ Promo Applied:", {
+    console.log("Promo Applied:", {
       code,
       type: promo.type,
       discount,
@@ -48,9 +47,8 @@ const validatePromoCode = async (req, res) => {
   }
 };
 
-// ✅ Create Booking
 const createBooking = async (req, res) => {
-  console.log("🟡 Booking Request Body:", req.body);
+  console.log("Booking Request Body:", req.body);
 
   const {
     experienceId,
@@ -61,42 +59,36 @@ const createBooking = async (req, res) => {
     numTickets = 1,
   } = req.body;
 
-  // 🧠 Default username if missing or empty
   const userName =
     user?.name && user.name.trim() !== "" ? user.name.trim() : "user1";
 
-  // ✅ Ensure user object exists
   if (!user) {
-    console.log("❌ Missing user object in request body");
-    return res.status(400).json({ message: "❌ Missing user details." });
+    console.log("Missing user object in request body");
+    return res.status(400).json({ message: "Missing user details." });
   }
 
-  // ✅ Validate required booking data
   if (!slot || !experienceId || !totalPrice || !user.email) {
-    console.log("❌ Invalid booking data:", req.body);
-    return res.status(400).json({ message: "❌ Missing required booking details." });
+    console.log(" Invalid booking data:", req.body);
+    return res.status(400).json({ message: " Missing required booking details." });
   }
 
   try {
     const slotData = await Slot.findById(slot);
     if (!slotData) {
-      console.log("❌ Slot not found:", slot);
+      console.log(" Slot not found:", slot);
       return res.status(404).json({ message: "❌ Slot not found." });
     }
 
-    // ✅ Prevent booking past dates
     if (slotData.date < new Date(new Date().setHours(0, 0, 0, 0))) {
-      console.log("❌ Slot is in the past:", slotData.date);
-      return res.status(400).json({ message: "❌ Cannot book past dates." });
+      console.log(" Slot is in the past:", slotData.date);
+      return res.status(400).json({ message: " Cannot book past dates." });
     }
 
-    // ✅ Check available seats
     if (slotData.bookedSeats + numTickets > slotData.totalSeats) {
-      console.log("❌ Not enough seats available.");
-      return res.status(400).json({ message: "❌ Not enough seats available." });
+      console.log("Not enough seats available.");
+      return res.status(400).json({ message: " Not enough seats available." });
     }
 
-    // ✅ Update booked seats
     const updatedSlot = await Slot.findByIdAndUpdate(
       slot,
       { $inc: { bookedSeats: numTickets } },
@@ -107,7 +99,6 @@ const createBooking = async (req, res) => {
       await Slot.updateOne({ _id: slot }, { $set: { status: "Sold Out" } });
     }
 
-    // ✅ Save booking
     const newBooking = new Booking({
       experience: experienceId,
       slot,
@@ -120,20 +111,20 @@ const createBooking = async (req, res) => {
     });
 
     const savedBooking = await newBooking.save();
-    console.log("✅ Booking Saved:", savedBooking._id);
+    console.log(" Booking Saved:", savedBooking._id);
 
     return res.status(201).json({
       success: true,
-      message: "✅ Booking successful!",
+      message: "Booking successful!",
       bookingId: savedBooking._id,
       confirmationNumber: savedBooking._id.toString().slice(-6).toUpperCase(),
       userName,
     });
   } catch (error) {
-    console.error("🔥 Booking Error:", error);
+    console.error(" Booking Error:", error);
     return res.status(500).json({
       success: false,
-      message: "❌ Booking failed due to server error.",
+      message: " Booking failed due to server error.",
       error: error.message,
     });
   }
