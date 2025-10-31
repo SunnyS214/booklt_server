@@ -65,7 +65,9 @@ Frontend Repo:
 Allowed Origins (CORS):
 
 https://booklt-smoky.vercel.app
+
 https://booklt-r8geoheji-sunnyss-projects.vercel.app
+
 http://localhost:5173
 
 👨‍💻 Developer
@@ -75,4 +77,5 @@ Sunny Sonawane
 
 🌍 Pune, India
 💼 MERN Stack Developer | Passionate about scalable full-stack solutions
+
 
